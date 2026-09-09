@@ -10,11 +10,25 @@ class MongoClientRepository extends BaseClientRepository {
     try {
       const client = new this.model(clientData);
       await client.save();
-      logger.debug("Client Created in Mongodb", {
+      logger.info("Client Created in Mongodb", {
         mongoId: client._id,
         slug: client.slug,
       });
       return client;
-    } catch (error) {}
+    } catch (error) {
+      logger.error("Error creating client in mongodb", error);
+      throw error;
+    }
+  }
+
+  async findById(clientId) {
+    try {
+      const client = await this.model.findById(clientId);
+      logger.info("Client details from mongodb", client);
+      return client;
+    } catch (error) {
+      logger.error("Error finding client in db by Id", error);
+      throw error;
+    }
   }
 }
