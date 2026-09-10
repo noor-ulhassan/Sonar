@@ -26,6 +26,7 @@ what, where, which phase raised it. When one is fixed, it moves to
 | `User.js` imported `"../utils/SecurityUtils.js"` (wrong name) | **Phase 7** | fixed for `User.js`. `ApiKey.js` still wrong — latent. |
 | request logger had no status / duration | **Phase 7** | new `requestLogger.js` logs on `res.on("finish")` with both. (Old inline logger in `server.js` not removed — see below.) |
 | the whole `services/auth/` slice was unreachable (empty router) | **Phase 7** | `authRouter` filled + `app.use("/api/auth", authRouter)`. Only `onboard-super-admin` fully works. |
+| Auth controllers were missing; login could not load bcrypt; logout used `GET` | Current work | Added register, login, profile, and logout controllers; imported `bcryptjs`; logout is now `POST`. |
 | `mongodb.js` unusable; `logger.js` `winston.combine`; `server.js` missing `import cors`; `init.postgress.sql` misspelled | Phase 5 | see phase-5 |
 | `server.js` was a `"Hi"` stub; both Dockerfiles empty; model files empty | Phases 2/4/5 | |
 | storage-split docs stale after the plan changed twice | Phase 4 | dated correction under phase-1 `1-product-and-architecture.md` |
@@ -34,12 +35,6 @@ what, where, which phase raised it. When one is fixed, it moves to
 
 ## Open — would stop something working
 
-- **`authController` has only `onboardSuperAdmin`.** The router calls
-  `authController.register` / `.login` / `.getProfile` / `.logout` — none exist.
-  Those four routes throw `TypeError` → `errorHandler` → generic 500. *(P7)*
-- **`authService.login` calls `this.comparePassword(...)`** — no such method on
-  `AuthService`, and no `User.comparePassword` either. Login can't succeed even
-  with a controller method. *(P7, and P2 "no comparePassword")*
 - **`ApiKey` cannot be saved** — `keyId` / `keyValue` are `required` + `unique`
   but nothing generates them. *(P2 — latent, nothing imports `ApiKey`)*
 - **`ApiKey.js` imports `"../utils/SecurityUtils.js"`** (wrong name). Fatal under
@@ -60,8 +55,6 @@ what, where, which phase raised it. When one is fixed, it moves to
   The two layers also disagree on the minimum (6 vs 8). *(P7)*
 - **`checkSuperAdminPermissions` has an empty `catch (error) {}`** — swallows DB
   errors, returns `undefined`. *(P7)*
-- **`GET /logout` should be `POST`** — clearing the auth cookie is a state
-  change; a `GET` can be fired by a prefetch or a crawled link. *(P7)*
 - **`cors({ origin: true })`** — reflects any origin. `credentials: true` was
   fixed in P7; the "allow any site" part must be pinned to the dashboard URL
   before production. *(P4, P7)*

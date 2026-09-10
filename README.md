@@ -23,7 +23,7 @@ are not.
 | Server bootstrap, DB/queue connections, graceful shutdown | Working |
 | `GET /` , `GET /health` | Working |
 | `POST /api/auth/onboard-super-admin` | Working end to end |
-| `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/profile`, `GET /api/auth/logout` | Routes and services are stubbed; controller methods are missing, so these currently return 500 |
+| `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/profile`, `POST /api/auth/logout` | Controller flow implemented; integration testing against the backing services remains |
 | Hit ingestion (`/api/hit`) | Not built |
 | Analytics API (`/api/analytics`) | Not built |
 | Queue consumer / PostgreSQL rollups | Not built |
@@ -182,10 +182,10 @@ Base URL: `http://localhost:<PORT>`.
 | `GET` | `/` | none | Service metadata and endpoint list |
 | `GET` | `/health` | none | Liveness, uptime, timestamp |
 | `POST` | `/api/auth/onboard-super-admin` | none (one-time) | Creates the first `super_admin`; rejected once one exists. Sets the auth cookie |
-| `POST` | `/api/auth/register` | `super_admin` cookie | Create a user (handler not implemented) |
-| `POST` | `/api/auth/login` | none | Exchange credentials for the auth cookie (handler not implemented) |
-| `GET` | `/api/auth/profile` | any authenticated | Current user (handler not implemented) |
-| `GET` | `/api/auth/logout` | none | Clear the auth cookie (handler not implemented) |
+| `POST` | `/api/auth/register` | `super_admin` cookie | Create a client-scoped user; cannot create a `super_admin` |
+| `POST` | `/api/auth/login` | none | Exchange credentials for the auth cookie |
+| `GET` | `/api/auth/profile` | any authenticated | Current user |
+| `POST` | `/api/auth/logout` | none | Clear the auth cookie |
 
 ### Response envelope
 

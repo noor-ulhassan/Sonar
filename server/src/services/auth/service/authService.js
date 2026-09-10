@@ -1,4 +1,5 @@
 import AppError from "../../../shared/utils/AppError.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../../../shared/config/index.js";
 import logger from "../../../shared/config/logger.js";
