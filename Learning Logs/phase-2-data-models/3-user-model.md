@@ -43,6 +43,14 @@ write. Nothing imports it yet, so none of this has run.
 - **Indexes** — `{ clientId, isActive }` ("active users in this tenant", the
   admin list) and `{ role }` ("find the super_admins").
 
-**Missing (Issues):** `select: false` on `password`, a `toJSON` transform to
-strip it, and a `comparePassword` instance method. Until then any query returns
-the hash, and every login path has to call `bcrypt.compare` by hand.
+**Missing (Issues):** `select: false` on `password` and a `toJSON` transform to
+strip it. Until then any query returns the hash, so callers must deliberately
+remove it before replying.
+
+> **Correction — Phase 8 (10 Sep 2026).** `User` is now reached through
+> `MongoUserRepository`, and the login flow no longer lacks password comparison:
+> `AuthService.comparePassword(plain, hash)` delegates to `bcrypt.compare`. It
+> is a service helper rather than a Mongoose instance method, so the repository
+> still returns the document and the service owns the authentication decision.
+> The exposure concern above remains: this does not make `password`
+> unselectable.

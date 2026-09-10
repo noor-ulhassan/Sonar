@@ -20,10 +20,16 @@ Content-Type: application/json
 { "username": "noor", "email": "noor@x.com", "password": "Str0ng!pass" }
 ```
 
-This is the one route that is fully working today. The other four
-(`/register`, `/login`, `/profile`, `/logout`) follow the same belt but hit a
+At the end of Phase 7, this was the one route that fully worked. The other four
+(`/register`, `/login`, `/profile`, `/logout`) followed the same belt but hit a
 missing controller method near the end — see
 [6-what-is-still-half-wired.md](6-what-is-still-half-wired.md).
+
+> **Historical correction — Phase 8 (10 Sep 2026).** All four missing
+> controller methods and the password-comparison helper now exist. This page
+> remains the onboarding walk-through because that route is still the clearest
+> full example; see [Phase 8: auth handlers](../phase-8-auth-completion-and-client-repository/1-finishing-the-auth-handlers.md)
+> for the other current flows.
 
 ---
 

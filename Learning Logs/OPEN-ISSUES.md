@@ -26,7 +26,8 @@ what, where, which phase raised it. When one is fixed, it moves to
 | `User.js` imported `"../utils/SecurityUtils.js"` (wrong name) | **Phase 7** | fixed for `User.js`. `ApiKey.js` still wrong — latent. |
 | request logger had no status / duration | **Phase 7** | new `requestLogger.js` logs on `res.on("finish")` with both. (Old inline logger in `server.js` not removed — see below.) |
 | the whole `services/auth/` slice was unreachable (empty router) | **Phase 7** | `authRouter` filled + `app.use("/api/auth", authRouter)`. Only `onboard-super-admin` fully works. |
-| Auth controllers were missing; login could not load bcrypt; logout used `GET` | Current work | Added register, login, profile, and logout controllers; imported `bcryptjs`; logout is now `POST`. |
+| Four auth controllers were missing; login called a missing password helper; logout used `GET` | **Phase 8** (`cd17043`) | Added register, login, profile, and logout controllers; `AuthService.comparePassword` delegates to `bcrypt.compare`; logout is now `POST`. |
+| `/register` accepted a requested `super_admin` role | **Phase 8** (`cd17043`) | `AuthController.register` rejects that role with `403`, preserving onboarding as the only super-admin creation path. |
 | `mongodb.js` unusable; `logger.js` `winston.combine`; `server.js` missing `import cors`; `init.postgress.sql` misspelled | Phase 5 | see phase-5 |
 | `server.js` was a `"Hi"` stub; both Dockerfiles empty; model files empty | Phases 2/4/5 | |
 | storage-split docs stale after the plan changed twice | Phase 4 | dated correction under phase-1 `1-product-and-architecture.md` |
@@ -69,9 +70,10 @@ what, where, which phase raised it. When one is fixed, it moves to
 - **Auth middleware bypasses the central error handler** — `authenticate` /
   `authorize` / `validate` build `res.json` inline instead of
   `next(new AppError(...))`. Two error styles. *(P6, P7)*
-- **`registrationSchema` lets a super admin create another `super_admin`** via
-  `/register` (role is an allowed field). `onboardSuperAdmin`'s "only one" guard
-  does not apply there. Confirm this is intended. *(P7)*
+- **A deactivated user can still use an already-issued JWT until it expires.**
+  `login` checks `isActive`, but `authenticate` verifies only the signed token
+  and `/profile` subsequently checks only that the user exists. Decide whether
+  protected routes should load the user and reject inactive accounts. *(P8)*
 - **`ApiKey` expiry TTL deletes the key document** (`expireAfterSeconds: 0`) — no
   audit trail. *(P2)*
 - **`ApiHits` 30-day TTL is global** — `Client.settings.dataRetentionDays` is
@@ -91,6 +93,13 @@ what, where, which phase raised it. When one is fixed, it moves to
 - **Two request loggers.** `server.js` still has its inline on-arrival logger;
   `requestLogger.js` (on-finish, with status) is attached per-route. Auth
   requests are logged twice, in two formats. Remove the inline one. *(P7)*
+- **`AuthService.register` mints a JWT that nobody receives.** The controller
+  extracts only `user`, sets no cookie, and returns no token. Either do not mint
+  it for an admin-created account or deliberately establish/return a session.
+  *(P8)*
+- **`MongoClientRepository` is incomplete and dormant.** It is neither exported
+  nor injected, and implements only `create` / `findById` of the five methods in
+  `BaseClientRepository`; no client route can reach it. *(P8)*
 - **Role strings duplicated** — `shared/constants/roles.js` is the source of
   truth, but `User.js` still hard-codes its `enum` and `UserRepository.create`
   hard-codes `"super_admin"`. *(P6)*

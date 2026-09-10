@@ -6,6 +6,11 @@ handle. The pipes are correct; the last inch is missing.
 Full detail and status for every item is in [../OPEN-ISSUES.md](../OPEN-ISSUES.md);
 this page is the Phase 7 shortlist with context.
 
+> **Historical correction — Phase 8 (10 Sep 2026).** Items 1, 2, and 7 on this
+> page were resolved: the four controller methods were added, login now uses
+> `bcrypt.compare`, and logout is `POST`. The remaining items are still current;
+> see [OPEN-ISSUES.md](../OPEN-ISSUES.md) for the live ledger.
+
 ---
 
 ## 1. The controller has one method; the router calls five

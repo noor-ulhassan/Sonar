@@ -3,6 +3,12 @@
 Each endpoint below is walked from the HTTP request to the HTTP response, through
 every layer. The **status column** says whether it actually works today.
 
+> **Historical correction — Phase 8 (10 Sep 2026).** This page records the
+> Phase 7 state, when four controller methods were absent. Phase 8 added those
+> handlers and `AuthService.comparePassword`, and changed logout from `GET` to
+> `POST`. The current endpoint walkthrough is
+> [Phase 8: auth handlers](../phase-8-auth-completion-and-client-repository/1-finishing-the-auth-handlers.md).
+
 All live under `/api/auth` (`app.use("/api/auth", authRouter)` in `server.js`).
 
 ---

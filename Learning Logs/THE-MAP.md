@@ -131,22 +131,21 @@ server/src/
 │                        status, duration. (P7)
 │
 └─ services/ ─────────── one folder per FEATURE, layers inside. Feature-first.
-   └─ auth/ ──────────── the only feature. MOUNTED at /api/auth as of P7.
+   ├─ auth/ ──────────── the only mounted feature, at /api/auth.
       ├─ routes/
       │  └─ authRouter.js ── 5 routes, each a path + verb + middleware chain →
-      │                      a controller method. Only onboard-super-admin has a
-      │                      working controller method; the other 4 → 500.
+      │                      a controller method. All five handlers exist as of P8.
       ├─ controller/
       │  └─ authController.js ─ the HTTP adapter: read req.body → ONE service call
-      │                        → set cookie + ResponseFormatter envelope.
-      │                        ONLY has onboardSuperAdmin; register/login/
-      │                        getProfile/logout are missing (P7 issue).
+      │                        → set/clear cookie + ResponseFormatter envelope.
+      │                        register blocks the super_admin role so onboarding
+      │                        remains the only bootstrap path. (P8)
       ├─ service/
       │  └─ authService.js ─── the business rules: onboardSuperAdmin ("one super
       │                        admin ever"), register, login, getProfile,
       │                        generateToken (JWT), formatUserForResponse (strip
-      │                        password). Knows nothing about req/res.
-      │                        (login calls a missing comparePassword — P7 issue)
+      │                        password), and comparePassword (bcrypt.compare).
+      │                        Knows nothing about req/res. (P8)
       ├─ repository/
       │  ├─ BaseRepository.js ─ abstract contract: 6 methods that throw
       │  │                      "not implemented". A stand-in for a JS interface.
@@ -159,6 +158,11 @@ server/src/
       └─ Dependencies/
          └─ dependencies.js ── the composition root. News up repo → service →
                                controller and wires them. Imported by authRouter.
+   └─ client/ ──────────────── repository work has started, but this feature is
+      │                         not mounted and has no service/controller/DI.
+      └─ repository/{BaseClientRepository,ClientRepository}.js
+                                contract + Mongo create/findById; not exported
+                                or called yet. (P8)
 ```
 
 ---
@@ -225,31 +229,34 @@ finished controller.
 | **5 — Running + Docker** | Fixed the startup-blocking bugs; `Dockerfile` + `Dockerfile.consumer`; `api-app` + gated `consumer` compose services | Make it actually boot, then make it boot the same way anywhere |
 | **6 — Layered architecture** | `services/auth/` (repository → service → controller → DI container); `roles.js`; `cookie` config; `authenticate` / `authorize` | Set the architecture on the first real feature so every later feature copies it |
 | **7 — Wiring auth end to end** | `authRouter` filled + mounted; `validate` middleware + `authSchema`; `requestLogger`; `authService` register/login/getProfile; `cookie-parser`; ~14 Phase 1–6 bugs fixed | Connect the built-but-dead auth slice to real HTTP, and pay down the bug debt so it actually serves a request |
+| **8 — Auth completion + client repository** | Four missing auth-controller methods; `bcrypt.compare` helper; logout changed to `POST`; a client repository contract and Mongo `create`/`findById` | Finish the HTTP adapters that Phase 7 left out, then begin the next feature from the persistence boundary upward |
 
 ---
 
 ## 6. What actually runs today vs what is just sitting there
 
-**Runs** (as of `2fe568e`):
+**Runs** (as of `cd17043`):
 
 - `docker compose up` → Postgres + Mongo + RabbitMQ + pgAdmin + `api-app`.
 - `server.js` boots, connects all three datastores, serves `GET /` and
   `GET /health`, 404s unmatched routes, shuts down cleanly on Ctrl-C.
-- **`POST /api/auth/onboard-super-admin` works end to end** — creates the first
-  admin, hashes the password, mints a JWT, returns it as an `httpOnly` cookie +
-  a `ResponseFormatter` envelope. The `count({role})` guard blocks a second one.
+- **All five auth endpoints have controller handlers.** Onboarding and login set
+  the auth cookie; profile reads the authenticated user; logout clears the
+  cookie; and register is protected by `authenticate` plus super-admin
+  authorization. Login now compares the submitted password with the bcrypt hash.
+  The flows are implemented but have not been integration-tested against the
+  backing services.
 - The full request pipeline is live: cookie-parser, helmet, cors-with-credentials,
   body parsing, per-route `requestLogger` / `authenticate` / `authorize` /
   `validate`, and the `errorHandler` at the bottom.
 
-**Built but NOT reachable / half-wired:**
+**Built but NOT reachable / incomplete:**
 
-- `POST /api/auth/register`, `/login`, `/profile`, `/logout` — routes and
-  middleware chains exist, but `authController` has only `onboardSuperAdmin`, so
-  these throw `TypeError` → 500. `authService.register` / `login` / `getProfile`
-  *are* written; `login` also calls a missing `comparePassword`.
-- All four models — only `User` is reached (via `UserRepository`). `Client` /
-  `ApiKey` / `ApiHits` have no caller.
+- The `client` feature has only its repository layer started. Its class is not
+  exported, no client service/controller/router/DI container exists, and
+  `server.js` does not mount it. It cannot serve an HTTP request yet.
+- `ApiKey` and `ApiHits` still have no caller. `Client` is reached only by the
+  unconnected repository file.
 - `endpoint_metrics` — the table exists, nothing writes it (no consumer).
 
 **Does not exist:**

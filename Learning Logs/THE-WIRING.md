@@ -341,17 +341,19 @@ This section is the "already know the shape, need the reminder" version.
 
 ---
 
-## 7. Worked example — adding a `Client` feature, in wiring order
+## 7. Adding the `Client` feature — current progress and wiring order
 
-The clearest way to *prove* you've internalised the wiring is to add the next
-feature the same shape. This is the order that actually works, file by file
-(none of this exists yet — it's the recipe, not a report):
+Phase 8 started this feature at the correct boundary: the repository contract
+and its Mongo implementation. That is useful progress, but a repository class
+on disk does not create an API. It becomes reachable only after the remaining
+layers are composed, routed, and mounted.
 
 1. **`shared/models/Client.js`** already exists (Phase 2) — the shape is there.
-2. **`services/client/repository/ClientRepository.js`** — `extends
-   BaseRepository` (or write a new base), `super(Client)`, implement
-   `create`/`findById`/... against the `Client` model. *Only this file imports
-   `Client.js`.*
+2. **`services/client/repository/{BaseClientRepository,ClientRepository}.js`**
+   now exist (Phase 8). The base declares `create`, `findById`, `findBySlug`,
+   `find`, and `count`; `MongoClientRepository` implements only `create` and
+   `findById` using `Client`. It still needs an export before another module can
+   inject it. *Only this file imports `Client.js`.*
 3. **`services/client/service/clientService.js`** — the rules ("slug must be
    unique", "only a super_admin may create a client"). Constructor takes a
    `clientRepository`. No `req`/`res`.

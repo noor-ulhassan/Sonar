@@ -56,11 +56,17 @@ router.get("/profile",
   (req, res, next) => authController.getProfile(req, res, next),
 );
 
-router.get("/logout",
+router.post("/logout",
   requestLogger,
   (req, res, next) => authController.logout(req, res, next),
 );
 ```
+
+> **Correction — Phase 8 (10 Sep 2026).** Logout is now `POST`, because
+> clearing an authentication cookie changes client state. The four controller
+> methods that this router already referenced (`register`, `login`,
+> `getProfile`, `logout`) were also added in Phase 8, so these routes no longer
+> fail merely because the adapter is missing.
 
 ## How to read one route line
 
@@ -74,7 +80,7 @@ the request by sending a response and *not* calling `next()`.
 | `POST /register` | log → **authenticate → authorize(SUPER_ADMIN)** → validate | you must be logged in **and** a super admin to create a user |
 | `POST /login` | log → validate | public; check the body then try to log in |
 | `GET /profile` | log → **authenticate** | you must be logged in; any role |
-| `GET /logout` | log only | public |
+| `POST /logout` | log only | public; clears the caller's browser cookie |
 
 ## Why the order is exactly this
 
