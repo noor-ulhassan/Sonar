@@ -109,10 +109,12 @@ async function startServer() {
       server.close(async () => {
         logger.info("HTTP Server closed");
         try {
-          await mongodb.disconnect();
-          await postgres.close();
-          await rabbitmq.close();
-          logger.info("All connections closed");
+          await Promise.all([
+            mongodb.disconnect(),
+            postgres.close(),
+            rabbitmq.close(),
+          ]);
+          logger.info("All connections closed cleanly");
           process.exit(0);
         } catch (error) {
           logger.error("Error closing connections", error);

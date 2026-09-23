@@ -59,7 +59,9 @@ export class AuthController {
       const { user } = await this.authService.register(req.body);
       return res
         .status(201)
-        .json(ResponseFormatter.success(user, "User registered successfully", 201));
+        .json(
+          ResponseFormatter.success(user, "User registered successfully", 201),
+        );
     } catch (error) {
       next(error);
     }
