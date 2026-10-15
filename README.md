@@ -1,5 +1,10 @@
 # API Hit Monitoring System
 
+For the verified current state and a handoff to another agent, start with
+[`PROJECT-HANDOFF.md`](PROJECT-HANDOFF.md). [`PROJECT-CONTEXT.md`](PROJECT-CONTEXT.md)
+is the portable snapshot containing the handoff and current source. Both are
+dated 8 October 2026; older phase notes and roadmap entries may describe earlier code.
+
 A backend service for recording API traffic and turning it into per-endpoint
 metrics. Instrumented services publish one event per request; the system stores
 the raw events, rolls them up into time-bucketed aggregates, and exposes the

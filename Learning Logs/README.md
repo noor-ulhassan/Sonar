@@ -8,6 +8,12 @@ one file, read for a few minutes, and have the full mental model back.
 
 ## Start here
 
+For the current implementation, environment evidence, and cross-agent continuity,
+read [PROJECT-HANDOFF.md](../PROJECT-HANDOFF.md) first (verified 8 October 2026).
+The phase documents below preserve the project's history; current source and the
+dated handoff resolve older status claims. A portable source snapshot is available
+in [PROJECT-CONTEXT.md](../PROJECT-CONTEXT.md).
+
 | File | What it gives you |
 |---|---|
 | **[THE-MAP.md](THE-MAP.md)** | The whole app on one page: architecture diagram, every file annotated, the layer model, the build timeline, what runs vs what is dead. **Read this first, and whenever you come back after a break.** |

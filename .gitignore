@@ -2,3 +2,5 @@ node_modules
 .env
 server/node_modules
 logs
+PROJECT-CONTEXT.md 
+PROJECT-HANDOFF.md
